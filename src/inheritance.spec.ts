@@ -2,7 +2,7 @@
 
 import * as assert from 'assert';
 
-import PugInheritance from './inheritance';
+import { PugInheritance } from './inheritance';
 
 describe('Module', function() {
 

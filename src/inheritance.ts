@@ -10,7 +10,7 @@ export interface ITree {
   getDependencies: (filename: string) => string[];
 }
 
-export default class PugInheritance {
+export class PugInheritance {
 
   protected treeStorage: any = {};
   protected cacheStorage: any = {};

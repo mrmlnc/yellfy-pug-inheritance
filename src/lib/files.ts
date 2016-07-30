@@ -6,7 +6,7 @@ import * as readdir from 'recursive-readdir';
 
 export function getAllFiles(dirpath: string): Promise<string[]> {
   return new Promise((resolve, reject) => {
-    readdir(dirpath, (err, files) => {
+    readdir(dirpath, ['!*.pug'], (err, files) => {
       if (err) {
         reject(err);
       }
