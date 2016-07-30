@@ -39,12 +39,23 @@ pugInheritance.updateTree('./path/to/changed/file').then((tree) => {
 
 ## Supported options
 
+#### PugInheritance constructor
+
 **dirname**
 
   * Type: `String`
   * Default: `none`
 
 The path to the Pug files.
+
+#### `updateTree` function
+
+**fileToUpdate**
+
+  * Type: `String`
+  * Default: `none`
+
+The name of the file that was changed.
 
 ## Gulp example
 
