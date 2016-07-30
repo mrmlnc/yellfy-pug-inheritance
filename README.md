@@ -39,7 +39,7 @@ pugInheritance.updateTree('./path/to/changed/file').then((tree) => {
 
 ## Supported options
 
-#### PugInheritance constructor
+### PugInheritance constructor
 
 **dirname**
 
@@ -48,7 +48,7 @@ pugInheritance.updateTree('./path/to/changed/file').then((tree) => {
 
 The path to the Pug files.
 
-#### `updateTree` function
+### `updateTree` function
 
 **fileToUpdate**
 
