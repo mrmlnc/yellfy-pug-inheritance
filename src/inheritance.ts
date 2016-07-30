@@ -10,7 +10,18 @@ export interface ITree {
   getDependencies: (filename: string) => string[];
 }
 
-export class PugInheritance {
+export interface IPugInheritance {
+  pagedir: string;
+  /**
+   * Update dependency tree.
+   *
+   * @param {string} [fileToUpdate] The name of the file that was changed.
+   * @returns {Promise<ITree>}
+   */
+  updateTree: (fileToUpdate?: string) => Promise<ITree>;
+}
+
+export class PugInheritance implements IPugInheritance {
 
   protected treeStorage: any = {};
   protected cacheStorage: any = {};
@@ -43,12 +54,6 @@ export class PugInheritance {
     return this.cacheStorage;
   }
 
-  /**
-   * Update dependency tree.
-   *
-   * @param {string} [fileToUpdate] The name of the file that was changed.
-   * @returns {Promise<ITree>}
-   */
   public updateTree(fileToUpdate?: string): Promise<ITree> {
     const filepaths: string[] = [];
 
@@ -109,6 +114,8 @@ export class PugInheritance {
     this.treeStorage[filename].map((dependency) => {
       dependencies = dependencies.concat(this.treeStorage[dependency]);
     });
+
+    dependencies.push(filename);
 
     return dependencies;
   }

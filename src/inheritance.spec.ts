@@ -36,9 +36,9 @@ describe('Module', function() {
 
   it('Module → getDependenciesForFile', () => {
     return pugInheritance.updateTree().then((tree) => {
-      assert.equal(tree.getDependencies('test/inheritance/page-1').length, 4);
-      assert.equal(tree.getDependencies('test/inheritance/page-2.pug').length, 3);
-      assert.equal(tree.getDependencies('test/inheritance/partials/b.pug').length, 0);
+      assert.equal(tree.getDependencies('test/inheritance/page-1').length, 5);
+      assert.equal(tree.getDependencies('test/inheritance/page-2.pug').length, 4);
+      assert.equal(tree.getDependencies('test/inheritance/partials/b.pug').length, 1);
     });
   });
 
