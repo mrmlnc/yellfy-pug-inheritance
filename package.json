@@ -13,7 +13,7 @@
   },
   "scripts": {
     "pretest": "rimraf out && tslint src/**/*.ts && tsc",
-    "test": "mocha out/**/*.spec.js",
+    "test": "mocha --recursive out",
     "prepublish": "npm run test",
     "start": "rimraf out && tsc --watch"
   },
