@@ -9,7 +9,7 @@ describe('Files', function() {
   it('Files → getAllFiles', () => {
     return getAllFiles('./test/inheritance').then((files) => {
       assert.equal(files.length, 8);
-      assert.ok(files.indexOf('test\\inheritance\\page-1.pug') !== -1);
+      assert.ok(files[0].indexOf('page-1.pug') !== -1);
     });
   });
 
