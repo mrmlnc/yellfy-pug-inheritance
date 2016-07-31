@@ -85,10 +85,6 @@ gulp.task('watch', () => {
 
   gulp.watch(['app/templates/**/*.pug'], gulp.series('templates'))
     .on('all', (event, filepath) => {
-      if (event !== 'change') {
-        global.changedTempalteFile = null;
-      }
-
       global.changedTempalteFile = filepath.replace(/\\/g, '/');
     });
 });
