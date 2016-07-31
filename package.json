@@ -1,6 +1,6 @@
 {
   "name": "yellfy-pug-inheritance",
-  "version": "1.0.0-alpha.3",
+  "version": "1.0.0-beta.0",
   "description": "Determine the inheritance of Pug (ex. Jade) templates.",
   "license": "MIT",
   "repository": "mrmlnc/yellfy-pug-inheritance",
@@ -21,9 +21,7 @@
   "typings": "out/inheritance.d.ts",
   "files": [
     "out/inheritance.js",
-    "out/inheritance.d.ts",
-    "out/lib/files.js",
-    "out/lib/paths.js"
+    "out/inheritance.d.ts"
   ],
   "keywords": [
     "yellfy",
@@ -37,6 +35,7 @@
     "cache"
   ],
   "dependencies": {
+    "pify": "^2.3.0",
     "recursive-readdir": "^2.0.0"
   },
   "devDependencies": {

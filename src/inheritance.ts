@@ -1,123 +1,136 @@
 'use strict';
 
 import * as path from 'path';
+import * as fs from 'fs';
 
-import { getAllFiles, getFileContent } from './lib/files';
-import { normalizePath, getFileDependencies } from './lib/paths';
+import * as pify from 'pify';
+import * as readdir from 'recursive-readdir';
 
-export interface ITree {
-  ['filename']: string[];
+const readdirPromise = pify(readdir);
+const readFilePromise = pify(fs.readFile);
+
+export interface ITreeStorage {
+  [filename: string]: string[];
+}
+
+export interface IOptions {
+  /**
+   * The name of the file that has been changed since the last build tree.
+   */
+  changedFile?: string;
+  /**
+   * The previous tree of dependencies that will be used as cache.
+   */
+  treeCache?: ITreeStorage;
+}
+
+export interface IResult {
+  /**
+   * Returns the dependency tree for all files.
+   */
+  tree: ITreeStorage;
+  /**
+   * Returns an array of dependencies for specified file.
+   */
   getDependencies: (filename: string) => string[];
+  /**
+   * Returns true if the specified file is in the dependencies of the specified file.
+   */
+  checkDependency: (filename: string, filenameToCheck: string) => boolean;
 }
 
-export interface IPugInheritance {
-  pagedir: string;
-  /**
-   * Update dependency tree.
-   *
-   * @param {string} [fileToUpdate] The name of the file that was changed.
-   * @returns {Promise<ITree>}
-   */
-  updateTree: (fileToUpdate?: string) => Promise<ITree>;
+let treeStorage = {} as ITreeStorage;
+
+function normalizePath(filepath: string): string {
+  if (path.extname(filepath) !== '.pug') {
+    filepath += '.pug';
+  }
+
+  return filepath.replace(/\\/g, '/');
 }
 
-export class PugInheritance implements IPugInheritance {
+function getFileDependencies(content: string): string[] {
+  const dependencies: string[] = [];
 
-  protected treeStorage: any = {};
-  protected cacheStorage: any = {};
+  content.split('\n').forEach((line) => {
+    const keyword = /(?:^|:)\s*(?:include|extends)\s+(.*)/g.exec(line);
 
-  constructor(public pagedir: string) { }
+    if (keyword) {
+      dependencies.push(keyword[1]);
+    }
+  });
 
-  /**
-   * Clearing dependency tree and cache.
-   */
-  public reset() {
-    this.treeStorage = {};
-    this.cacheStorage = {};
+  return dependencies;
+}
+
+function getDependencies(filename: string): string[] {
+  filename = normalizePath(filename);
+
+  let dependencies: string[] = treeStorage[filename];
+
+  treeStorage[filename].map((dependency) => {
+    dependencies = dependencies.concat(treeStorage[dependency]);
+  });
+
+  dependencies.push(filename);
+
+  return dependencies;
+}
+
+function checkDependency(filename: string, changedFile: string): boolean {
+  filename = normalizePath(filename);
+  changedFile = normalizePath(changedFile);
+
+  return getDependencies(filename).indexOf(changedFile) !== -1;
+}
+
+export function updateTree(dir: string, options?: IOptions): Promise<IResult> {
+  options = Object.assign({ changedFile: null, treeCache: {} }, options);
+
+  if (!dir) {
+    throw new Error('`dir` required');
+  }
+  if (options.treeCache) {
+    treeStorage = Object.assign({}, options.treeCache);
   }
 
-  /**
-   * Get tree.
-   *
-   * @readonly
-   */
-  public get tree() {
-    return this.treeStorage;
-  }
+  const filenames = [];
 
-  /**
-   * Get cache.
-   *
-   * @readonly
-   */
-  public get cache() {
-    return this.cacheStorage;
-  }
-
-  public updateTree(fileToUpdate?: string): Promise<ITree> {
-    const filepaths: string[] = [];
-
-    return getAllFiles(this.pagedir).then((files) => {
-      const promises = [];
-
-      for (let i = 0; i < files.length; i++) {
-        const filepath = normalizePath(files[i]);
-        const cache = this.cacheStorage[filepath];
-
-        filepaths.push(filepath);
-
-        if (!cache || (fileToUpdate && filepath.indexOf(fileToUpdate) !== -1)) {
-          promises[i] = getFileContent(filepath);
-          continue;
-        }
-
-        promises[i] = cache;
+  return readdirPromise(dir, ['!*.pug']).then((files) => {
+    const promises = [];
+    files.forEach((file, index) => {
+      const filename = normalizePath(file);
+      const cache = options.treeCache[filename];
+      if (!cache || filename.indexOf(options.changedFile) !== -1) {
+        promises[index] = readFilePromise(filename, 'utf8');
+      } else {
+        promises[index] = cache;
       }
 
-      return Promise.all(promises);
-    }).then((files) => {
-      for (let i = 0; i < files.length; i++) {
-        const content = files[i];
-        const filename = filepaths[i];
+      filenames.push(filename);
+    });
 
-        // If file exists in the cache.
-        if (Array.isArray(content)) {
-          this.treeStorage[filename] = content;
-          continue;
-        }
+    return Promise.all(promises);
+  }).then((files) => {
+    filenames.forEach((filename, index) => {
+      const file = files[index];
+      const context = path.dirname(filename);
 
-        const context = path.dirname(filename);
-        this.treeStorage[filename] = getFileDependencies(content).map((dependency) => {
-          return normalizePath(path.join(context, dependency));
-        });
-
-        this.cacheStorage[filename] = this.treeStorage[filename];
+      // If file exists in the cache.
+      if (Array.isArray(file)) {
+        treeStorage[filename] = file;
+        return;
       }
 
-      this.treeStorage.getDependencies = this.getDependencies.bind(this);
-
-      return this.treeStorage;
-    });
-  }
-
-  /**
-   * Dependencies of a file.
-   *
-   * @param {string} filename
-   * @returns {string[]}
-   */
-  private getDependencies(filename: string): string[] {
-    filename = normalizePath(filename);
-
-    let dependencies: string[] = this.treeStorage[filename];
-
-    this.treeStorage[filename].map((dependency) => {
-      dependencies = dependencies.concat(this.treeStorage[dependency]);
+      treeStorage[filename] = getFileDependencies(file).map((filepath) => {
+        return normalizePath(path.join(context, filepath));
+      });
     });
 
-    dependencies.push(filename);
-
-    return dependencies;
-  }
-
+    return {
+      tree: treeStorage,
+      getDependencies,
+      checkDependency
+    };
+  });
 }

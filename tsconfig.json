@@ -4,9 +4,9 @@
     "module": "commonjs",
     "moduleResolution": "classic",
     "outDir": "out",
+    "noLib": false,
     "noImplicitAny": false,
     "removeComments": false,
-    "preserveConstEnums": true,
     "experimentalDecorators": true,
     "declaration": true
   }
