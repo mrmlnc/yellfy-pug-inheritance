@@ -5,6 +5,7 @@ import * as fs from 'fs';
 
 import * as pify from 'pify';
 import * as readdir from 'recursive-readdir';
+import * as minimatch from 'minimatch';
 
 const readdirPromise = pify(readdir);
 const readFilePromise = pify(fs.readFile);
@@ -22,6 +23,10 @@ export interface IOptions {
    * The previous tree of dependencies that will be used as cache.
    */
   treeCache?: ITreeStorage;
+  /**
+   * Working with Jade files.
+   */
+  jade?: boolean;
 }
 
 export interface IResult {
@@ -40,10 +45,11 @@ export interface IResult {
 }
 
 let treeStorage = {} as ITreeStorage;
+let extension = '';
 
 function normalizePath(filepath: string): string {
-  if (path.extname(filepath) !== '.pug') {
-    filepath += '.pug';
+  if (path.extname(filepath) !== extension) {
+    filepath += extension;
   }
 
   return filepath.replace(/\\/g, '/');
@@ -63,15 +69,33 @@ function getFileDependencies(content: string): string[] {
   return dependencies;
 }
 
+function traverse(dependencies: string[]): string[] {
+  const tree = Array.from(dependencies);
+  const keys = Object.keys(treeStorage);
+  const newDeps = tree;
+
+  tree.forEach((dependency) => {
+    keys.forEach((key) => {
+      if (!minimatch(key, dependency)) {
+        return;
+      }
+      if (newDeps.indexOf(key) === -1) {
+        newDeps.push(key);
+      }
+
+      newDeps.push(...traverse(treeStorage[key]));
+    });
+  });
+
+  return [...new Set(newDeps)];
+}
+
 function getDependencies(filename: string): string[] {
   filename = normalizePath(filename);
 
   let dependencies: string[] = treeStorage[filename];
 
-  treeStorage[filename].map((dependency) => {
-    dependencies = dependencies.concat(treeStorage[dependency]);
-  });
-
+  dependencies = traverse(dependencies);
   dependencies.push(filename);
 
   return dependencies;
@@ -85,7 +109,11 @@ function checkDependency(filename: string, changedFile: string): boolean {
 }
 
 export function updateTree(dir: string, options?: IOptions): Promise<IResult> {
-  options = Object.assign({ changedFile: null, treeCache: {} }, options);
+  options = Object.assign({
+    jade: false,
+    changedFile: null,
+    treeCache: {}
+  }, options);
 
   if (!dir) {
     throw new Error('`dir` required');
@@ -94,9 +122,13 @@ export function updateTree(dir: string, options?: IOptions): Promise<IResult> {
     treeStorage = Object.assign({}, options.treeCache);
   }
 
+  // Set extension
+  extension = (options.jade) ? '.jade' : '.pug';
+
+  // Sync files and their dependencies
   const filenames = [];
 
-  return readdirPromise(dir, ['!*.pug']).then((files) => {
+  return readdirPromise(dir, [`!*${extension}`]).then((files) => {
     const promises = [];
     files.forEach((file, index) => {
       const filename = normalizePath(file);

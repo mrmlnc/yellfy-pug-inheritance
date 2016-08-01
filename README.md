@@ -50,6 +50,13 @@ The name of the file that has been changed since the last build tree.
 
 The previous tree of dependencies that will be used as cache.
 
+**jade**
+
+  * Type: `Boolean`
+  * Default: `false`
+
+Working with Jade files.
+
 #### Result
 
 **tree**

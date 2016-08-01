@@ -3,55 +3,80 @@
 import * as assert from 'assert';
 import { updateTree } from './inheritance';
 
-describe('Tree', () => {
+describe('Basic functionality.', () => {
 
   it('Should return a tree of dependencies.', () => {
-    return updateTree('./fixtures').then((result) => {
-      assert.equal(Object.keys(result.tree).length, 9);
-      assert.equal(result.tree['fixtures/parser.pug'].length, 4);
-      assert.equal(result.tree['fixtures/page-1.pug'].length, 2);
+    return updateTree('./fixtures/pug').then((result) => {
+      assert.equal(Object.keys(result.tree).length, 13);
+      assert.equal(result.tree['fixtures/pug/page-1.pug'].length, 2);
+      assert.equal(result.tree['fixtures/pug/parser.pug'].length, 4);
+      assert.equal(result.tree['fixtures/pug/content/b.pug'].length, 1);
+      assert.equal(result.tree['fixtures/pug/partials/footer.pug'], 0);
     });
   });
 
   it('Should work with the cache.', () => {
-    return updateTree('./fixtures', {
+    return updateTree('./fixtures/pug', {
       treeCache: {
-        'fixtures/parser.pug': ['hello']
+        'fixtures/pug/parser.pug': ['hello']
       }
     }).then((result) => {
-      assert.equal(result.tree['fixtures/parser.pug'], 'hello');
+      assert.equal(result.tree['fixtures/pug/parser.pug'], 'hello');
     });
   });
 
   it('Should re-read the changed file.', () => {
-    return updateTree('./fixtures', {
-      changedFile: 'fixtures/parser.pug',
+    return updateTree('./fixtures/pug', {
+      changedFile: 'fixtures/pug/parser.pug',
       treeCache: {
-        'fixtures/parser.pug': ['hello']
+        'fixtures/pug/parser.pug': ['hello']
       }
     }).then((result) => {
-      assert.equal(result.tree['fixtures/parser.pug'].length, 4);
+      assert.equal(result.tree['fixtures/pug/parser.pug'].length, 4);
+    });
+  });
+
+  it('Working with Jade files.', () => {
+    return updateTree('./fixtures/jade', { jade: true }).then((result) => {
+      assert.equal(Object.keys(result.tree).length, 2);
     });
   });
 
 });
 
-describe('Methods', () => {
+describe('Check dependencies for single file.', () => {
 
-  it('Methods → getDependencies', () => {
-    return updateTree('./fixtures').then((result) => {
-      const dependencies = result.getDependencies('fixtures/page-1');
+  it('Should return a full list of dependencies for a single file.', () => {
+    return updateTree('./fixtures/pug').then((result) => {
+      const dependencies = result.getDependencies('fixtures/pug/page-1');
 
-      assert.equal(dependencies.length, 5);
-      assert.ok(result.checkDependency('fixtures/page-1', 'fixtures/partials/a.pug'));
-      assert.ok(result.checkDependency('fixtures/page-1', 'fixtures/partials/b.pug'));
+      assert.equal(dependencies.length, 9);
+      assert.ok(dependencies.indexOf('fixtures/pug/content/c.pug') !== -1);
+      assert.ok(dependencies.indexOf('fixtures/pug/page-1.pug') !== -1);
+      assert.ok(dependencies.indexOf('fixtures/pug/content/a.pug') !== -1);
     });
   });
 
-  it('Methods → checkDependency', () => {
-    return updateTree('./fixtures').then((result) => {
-      assert.ok(result.checkDependency('fixtures/page-1', 'fixtures/page-1'));
-      assert.ok(result.checkDependency('fixtures/page-1', 'fixtures/partials/b.pug'));
+  it('Should return a full list of dependencies for a single file (with glob-pattern).', () => {
+    return updateTree('./fixtures/pug').then((result) => {
+      const dependencies = result.getDependencies('fixtures/pug/all.pug');
+
+      assert.equal(dependencies.length, 14);
+      assert.ok(dependencies.indexOf('fixtures/pug/all.pug') !== -1);
+      assert.ok(dependencies.indexOf('fixtures/pug/partials/**/*.pug') !== -1);
+      assert.ok(dependencies.indexOf('fixtures/pug/page-*.pug') !== -1);
+    });
+  });
+
+});
+
+describe('Check a file as is dependency.', () => {
+
+  it('Should return true if the file depends on another file.', () => {
+    return updateTree('./fixtures/pug').then((result) => {
+      assert.ok(result.checkDependency('fixtures/pug/page-1', 'fixtures/pug/page-1'));
+      assert.ok(result.checkDependency('fixtures/pug/page-1', 'fixtures/pug/content/b.pug'));
+      assert.ok(result.checkDependency('fixtures/pug/all.pug', 'fixtures/pug/content/b.pug'));
     });
   });
 

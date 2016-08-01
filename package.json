@@ -35,6 +35,7 @@
     "cache"
   ],
   "dependencies": {
+    "minimatch": "^3.0.2",
     "pify": "^2.3.0",
     "recursive-readdir": "^2.0.0"
   },
