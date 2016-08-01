@@ -72,22 +72,22 @@ function getFileDependencies(content: string): string[] {
 function traverse(dependencies: string[]): string[] {
   const tree = Array.from(dependencies);
   const keys = Object.keys(treeStorage);
-  const newDeps = tree;
+  let fullDependencies = tree;
 
   tree.forEach((dependency) => {
     keys.forEach((key) => {
       if (!minimatch(key, dependency)) {
         return;
       }
-      if (newDeps.indexOf(key) === -1) {
-        newDeps.push(key);
+      if (fullDependencies.indexOf(key) === -1) {
+        fullDependencies.push(key);
       }
 
-      newDeps.push(...traverse(treeStorage[key]));
+      fullDependencies = fullDependencies.concat(traverse(treeStorage[key]));
     });
   });
 
-  return [...new Set(newDeps)];
+  return Array.from(new Set(fullDependencies));
 }
 
 function getDependencies(filename: string): string[] {
