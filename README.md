@@ -87,6 +87,8 @@ const filter = require('gulp-filter');
 const pugInheritance = require('yellfy-pug-inheritance');
 const pug = require('gulp-pug');
 
+let pugInheritanceCache = {};
+
 gulp.task('watch', () => {
   global.watch = true;
 
@@ -96,21 +98,32 @@ gulp.task('watch', () => {
     });
 });
 
+function pugFilter(file, inheritance) {
+  const filepath = `app/templates/${file.relative}`;
+  if (inheritance.checkDependency(filepath, global.changedTempalteFile)) {
+    console.log(`Compiling: ${filepath}`);
+    return true;
+  }
+
+  return false;
+}
+
 gulp.task('templates', () => {
   return new Promise((resolve, reject) => {
-    const changedFile = global.changedTempalteFile || null;
-    pugInheritance.updateTree('./path/to/pug/files', { changedFile }).then(() => {
-      return gulp.src('app/templates/*.pug')
-        .pipe(gulpif(global.watch, filter((file) => {
-          const filepath = `app/templates/${file.relative}`;
-          if (inheritance.checkDependency(filepath, global.changedTempalteFile)) {
-            console.log(`Compiling: ${filepath}`);
-            return true;
-          }
+    const changedFile = global.changedTempalteFile;
+    const options = {
+      changedFile,
+      treeCache: pugInheritanceCache
+    };
 
-          return false;
-        })))
+    pugInheritance.updateTree('./path/to/pug/files', options).then((inheritance) => {
+      // Save cache for secondary compilations
+      pugInheritanceCache = inheritance.tree;
+
+      return gulp.src('app/templates/*.pug')
+        .pipe(gulpif(global.watch, filter((file) => pugFilter(file, inheritance))))
         .pipe(pug({ pretty: true }))
+        .pipe(gulp.dest('build'))
         .on('end', resolve)
         .on('error', reject);
     });
