@@ -19,8 +19,8 @@ Because existing solutions use redundant modules such as Pug parser and Glob.
 ```js
 const pugInheritance = require('yellfy-pug-inheritance');
 
-pugInheritance.updateTree('./path/to/pug/files').then((tree) => {
-  console.log(tree);
+pugInheritance.updateTree('./path/to/pug/files').then((inheritance) => {
+  console.log(inheritance.tree);
   // 'main.pug': [
   //   'a.pug',
   //   'dir/b.pug'
