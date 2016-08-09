@@ -1,6 +1,6 @@
 {
   "name": "yellfy-pug-inheritance",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "Determine the inheritance of Pug (ex. Jade) templates.",
   "license": "MIT",
   "repository": "mrmlnc/yellfy-pug-inheritance",
