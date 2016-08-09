@@ -3,12 +3,32 @@
 import * as path from 'path';
 import * as fs from 'fs';
 
-import * as pify from 'pify';
 import * as readdir from 'recursive-readdir';
 import * as minimatch from 'minimatch';
 
-const readdirPromise = pify(readdir);
-const readFilePromise = pify(fs.readFile);
+function readdirPromise(dir: string, ignore: string[]): Promise<string[]> {
+  return new Promise((resolve, reject) => {
+    readdir(dir, ignore, (err, files) => {
+      if (err) {
+        reject(err);
+      }
+
+      resolve(files);
+    });
+  });
+}
+
+function readFilePromise(filepath: string, encode: string): Promise<string> {
+  return new Promise((resolve, reject) => {
+    fs.readFile(filepath, encode, (err, files) => {
+      if (err) {
+        reject(err);
+      }
+
+      resolve(files);
+    });
+  });
+}
 
 export interface ITreeStorage {
   [filename: string]: string[];
@@ -148,7 +168,7 @@ export function updateTree(dir: string, options?: IOptions): Promise<IResult> {
       const file = files[index];
       const context = path.dirname(filename);
 
-      // If file exists in the cache.
+      // If file exists in the cache
       if (Array.isArray(file)) {
         treeStorage[filename] = file;
         return;

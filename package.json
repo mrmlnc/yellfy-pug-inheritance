@@ -35,14 +35,13 @@
     "cache"
   ],
   "dependencies": {
-    "minimatch": "^3.0.2",
-    "pify": "^2.3.0",
+    "minimatch": "^3.0.0",
     "recursive-readdir": "^2.0.0"
   },
   "devDependencies": {
     "rimraf": "^2.5.0",
     "typescript": "^1.8.0",
     "tslint": "^3.13.0",
-    "mocha": "^3.0.2"
+    "mocha": "^3.0.0"
   }
 }
