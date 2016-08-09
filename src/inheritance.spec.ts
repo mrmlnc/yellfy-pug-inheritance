@@ -9,7 +9,7 @@ describe('Basic functionality.', () => {
     return updateTree('./fixtures/pug').then((result) => {
       assert.equal(Object.keys(result.tree).length, 13);
       assert.equal(result.tree['fixtures/pug/page-1.pug'].length, 2);
-      assert.equal(result.tree['fixtures/pug/parser.pug'].length, 4);
+      assert.equal(result.tree['fixtures/pug/parser.pug'].length, 14);
       assert.equal(result.tree['fixtures/pug/content/b.pug'].length, 1);
       assert.equal(result.tree['fixtures/pug/partials/footer.pug'], 0);
     });
@@ -32,7 +32,7 @@ describe('Basic functionality.', () => {
         'fixtures/pug/parser.pug': ['hello']
       }
     }).then((result) => {
-      assert.equal(result.tree['fixtures/pug/parser.pug'].length, 4);
+      assert.equal(result.tree['fixtures/pug/parser.pug'].length, 14);
     });
   });
 

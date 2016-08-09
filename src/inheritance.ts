@@ -68,7 +68,7 @@ let treeStorage = {} as ITreeStorage;
 let extension = '';
 
 function normalizePath(filepath: string): string {
-  if (path.extname(filepath) !== extension) {
+  if (!path.extname(filepath)) {
     filepath += extension;
   }
 
@@ -77,11 +77,22 @@ function normalizePath(filepath: string): string {
 
 function getFileDependencies(content: string): string[] {
   const dependencies: string[] = [];
+  let skip = -1;
 
   content.split('\n').forEach((line) => {
-    const keyword = /(?:^|:)\s*(?:include|extends)\s+(.*)/g.exec(line);
+    const comment = /\/\//.exec(line);
+    if (comment) {
+      skip = comment.index;
+      return;
+    }
 
-    if (keyword) {
+    const whiteSpaces = /^\s*/.exec(line);
+    if (whiteSpaces[0].length <= skip || /^\S/.test(line)) {
+      skip = -1;
+    }
+
+    const keyword = /(?:^|:)\s*(?:include|extends).*\s+(.*)/g.exec(line);
+    if (keyword && skip === -1) {
       dependencies.push(keyword[1]);
     }
   });
