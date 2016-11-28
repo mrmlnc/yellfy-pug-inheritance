@@ -10,7 +10,7 @@ function readdirPromise(dir: string, ignore: string[]): Promise<string[]> {
   return new Promise((resolve, reject) => {
     readdir(dir, ignore, (err, files) => {
       if (err) {
-        reject(err);
+        return reject(err);
       }
 
       resolve(files);
@@ -22,7 +22,7 @@ function readFilePromise(filepath: string, encode: string): Promise<string> {
   return new Promise((resolve, reject) => {
     fs.readFile(filepath, encode, (err, files) => {
       if (err) {
-        reject(err);
+        return reject(err);
       }
 
       resolve(files);
