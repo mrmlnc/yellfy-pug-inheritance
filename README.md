@@ -116,7 +116,7 @@ gulp.task('templates', () => {
       treeCache: pugInheritanceCache
     };
 
-    pugInheritance.updateTree('./path/to/pug/files', options).then((inheritance) => {
+    pugInheritance.updateTree('./app/templates', options).then((inheritance) => {
       // Save cache for secondary compilations
       pugInheritanceCache = inheritance.tree;
 
