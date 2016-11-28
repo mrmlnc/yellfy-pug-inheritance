@@ -11,12 +11,6 @@
   "engines": {
     "node": ">=4.0.0"
   },
-  "scripts": {
-    "pretest": "rimraf out && tslint src/**/*.ts && tsc",
-    "test": "mocha --recursive out",
-    "prepublish": "npm run test",
-    "start": "rimraf out && tsc --watch"
-  },
   "main": "out/inheritance.js",
   "typings": "out/inheritance.d.ts",
   "files": [
@@ -36,12 +30,20 @@
   ],
   "dependencies": {
     "minimatch": "^3.0.0",
-    "recursive-readdir": "^2.0.0"
+    "recursive-readdir": "^2.1.0"
   },
   "devDependencies": {
+    "mocha": "^3.0.0",
     "rimraf": "^2.5.0",
-    "typescript": "^1.8.0",
     "tslint": "^3.13.0",
-    "mocha": "^3.0.0"
+    "typescript": "^2.0.10"
+  },
+  "scripts": {
+    "clean": "rimraf out",
+    "lint": "tslint src/**/*.ts",
+    "compile": "tsc",
+    "test": "mocha out/**/*.spec.js",
+    "build": "npm run clean && npm run lint && npm run compile && npm test ",
+    "watch": "npm run clean && npm run lint && npm run compile -- --sourceMap --watch"
   }
 }
