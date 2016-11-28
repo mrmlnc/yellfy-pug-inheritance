@@ -87,19 +87,25 @@ const filter = require('gulp-filter');
 const pugInheritance = require('yellfy-pug-inheritance');
 const pug = require('gulp-pug');
 
-let pugInheritanceCache = {};
+// Cache
+const pugInheritanceCache = {};
 
+// Root directory that contains your Pug files
+const pugDirectory = 'app/templates';
+
+// Watch task
 gulp.task('watch', () => {
   global.watch = true;
 
-  gulp.watch(['app/templates/**/*.pug'], gulp.series('templates'))
+  gulp.watch([`${pugDirectory}/**/*.pug`], gulp.series('templates'))
     .on('all', (event, filepath) => {
       global.changedTempalteFile = filepath.replace(/\\/g, '/');
     });
 });
 
+// Filter for files
 function pugFilter(file, inheritance) {
-  const filepath = `app/templates/${file.relative}`;
+  const filepath = `${pugDirectory}/${file.relative}`;
   if (inheritance.checkDependency(filepath, global.changedTempalteFile)) {
     console.log(`Compiling: ${filepath}`);
     return true;
@@ -108,6 +114,7 @@ function pugFilter(file, inheritance) {
   return false;
 }
 
+// Templates task
 gulp.task('templates', () => {
   return new Promise((resolve, reject) => {
     const changedFile = global.changedTempalteFile;
@@ -116,11 +123,13 @@ gulp.task('templates', () => {
       treeCache: pugInheritanceCache
     };
 
-    pugInheritance.updateTree('./app/templates', options).then((inheritance) => {
+    // Update cache for all files or only for specified file
+    pugInheritance.updateTree(pugDirectory, options).then((inheritance) => {
       // Save cache for secondary compilations
       pugInheritanceCache = inheritance.tree;
 
-      return gulp.src('app/templates/*.pug')
+      return gulp.src(`${pugDirectory}/*.pug`)
+        // We can use Cache only for Watch mode
         .pipe(gulpif(global.watch, filter((file) => pugFilter(file, inheritance))))
         .pipe(pug({ pretty: true }))
         .pipe(gulp.dest('build'))
