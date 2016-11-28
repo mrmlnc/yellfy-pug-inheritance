@@ -91,7 +91,7 @@ function getFileDependencies(content: string): string[] {
       skip = -1;
     }
 
-    const keyword = /(?:^|:)\s*(?:include|extends).*\s+(.*)/g.exec(line);
+    const keyword = /(?:^|:)\s*(?:include|extends).*?\s+(.*)/g.exec(line);
     if (keyword && skip === -1) {
       dependencies.push(keyword[1]);
     }
