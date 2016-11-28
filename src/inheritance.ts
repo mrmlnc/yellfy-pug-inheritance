@@ -77,25 +77,38 @@ function normalizePath(filepath: string): string {
 
 function getFileDependencies(content: string): string[] {
   const dependencies: string[] = [];
-  let skip = -1;
+  const reKeyword = /(?:^|:)\s*(?:include|extends).*?\s+(.*)/;
+  const reCommentStart = /\/\//;
+  const reLineStart = /^(\s*)/;
+  const lines = content.split('\n');
 
-  content.split('\n').forEach((line) => {
-    const comment = /\/\//.exec(line);
+  let keyword: RegExpExecArray;
+  let line: string;
+  let comment: RegExpExecArray;
+  let indent = -1;
+
+  for (let i = 0; i < lines.length; i++) {
+    line = lines[i];
+    // Skip lines with comment substring
+    comment = reCommentStart.exec(line);
     if (comment) {
-      skip = comment.index;
-      return;
+      indent = comment.index;
+      continue;
     }
 
-    const whiteSpaces = /^\s*/.exec(line);
-    if (whiteSpaces[0].length <= skip || /^\S/.test(line)) {
-      skip = -1;
+    comment = reLineStart.exec(line);
+    if (indent === -1 || comment[0].length === 0) {
+      indent = -1;
     }
 
-    const keyword = /(?:^|:)\s*(?:include|extends).*?\s+(.*)/g.exec(line);
-    if (keyword && skip === -1) {
-      dependencies.push(keyword[1]);
+    if (indent === -1) {
+      keyword = reKeyword.exec(line);
     }
-  });
+
+    if (keyword) {
+      dependencies.push(keyword[1].trim());
+    }
+  }
 
   return dependencies;
 }

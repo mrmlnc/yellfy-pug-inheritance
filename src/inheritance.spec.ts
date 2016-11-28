@@ -15,7 +15,7 @@ describe('Basic functionality.', () => {
     });
   });
 
-  it('Should work with the cache.', () => {
+  it('Should work with cache.', () => {
     return updateTree('./fixtures/pug', {
       treeCache: {
         'fixtures/pug/parser.pug': ['hello']
