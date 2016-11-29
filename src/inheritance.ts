@@ -97,7 +97,7 @@ function getFileDependencies(content: string): string[] {
     }
 
     comment = reLineStart.exec(line);
-    if (indent === -1 || comment[0].length === 0) {
+    if (comment[0].length === 0) {
       indent = -1;
     }
 
