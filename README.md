@@ -88,7 +88,7 @@ const pugInheritance = require('yellfy-pug-inheritance');
 const pug = require('gulp-pug');
 
 // Cache
-const pugInheritanceCache = {};
+let pugInheritanceCache = {};
 
 // Root directory that contains your Pug files
 const pugDirectory = 'app/templates';
