@@ -80,7 +80,7 @@ function getFileDependencies(content: string): string[] {
   const reKeyword = /(?:^|:)\s*(?:include|extends).*?\s+(.*)/;
   const reCommentStart = /\/\//;
   const reLineStart = /^(\s*)/;
-  const lines = content.split('\n');
+  const lines = content.split(/\r?\n/);
 
   let keyword: RegExpExecArray;
   let line: string;
