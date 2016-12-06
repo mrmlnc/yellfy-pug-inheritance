@@ -1,3 +1,11 @@
+# Package deprecated
+
+## Please, use [emitty](https://github.com/mrmlnc/emitty). It's **easier** and more convenient.
+
+---
+---
+---
+
 # yellfy-pug-inheritance
 
 > Determine the inheritance of Pug (ex. Jade) templates.
