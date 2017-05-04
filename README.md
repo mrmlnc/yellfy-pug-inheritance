@@ -1,5 +1,7 @@
 # Package deprecated
 
+[![Greenkeeper badge](https://badges.greenkeeper.io/mrmlnc/yellfy-pug-inheritance.svg)](https://greenkeeper.io/)
+
 ## Please, use [emitty](https://github.com/mrmlnc/emitty). It's **easier** and more convenient.
 
 ---
