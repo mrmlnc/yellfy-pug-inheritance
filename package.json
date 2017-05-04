@@ -35,11 +35,11 @@
   "devDependencies": {
     "@types/minimatch": "^2.0.29",
     "@types/mocha": "^2.2.33",
-    "@types/node": "0.0.0",
+    "@types/node": "7.0.16",
     "@types/recursive-readdir": "^1.2.28",
     "mocha": "^3.0.0",
     "rimraf": "^2.5.0",
-    "tslint": "^3.13.0",
+    "tslint": "^5.2.0",
     "typescript": "^2.0.10"
   },
   "scripts": {
